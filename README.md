@@ -26,6 +26,14 @@ MemEater is intended for:
 **Warning:** Running MemEater will intentionally make your system unstable or unresponsive by consuming large amounts of memory.  
 Use with caution and save your work before starting any test.
 
+## Screenshots
+
+### Normal Memory Usage
+![MemEater normal memory usage](./screenshot1.png)
+
+### Memory Fully Consumed (Stress Test)
+![MemEater memory fully consumed](./screenshot2.png)
+
 ## Usage
 
 1. Download and run the executable on a modern Windows system.
