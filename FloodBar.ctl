@@ -162,6 +162,9 @@ Private Sub DrawFlood()
   Dim fWidth As Long, fLeft As Long
   fWidth = CalculateFloodWidth()
   With FloodRect
+    If (.Left + fWidth) > .Right Then
+      fWidth = (.Right - .Left)
+    End If
     If fWidth >= 15 Then
       UserControl.Line (.Left, .Top)-((.Left + fWidth), .Bottom), GetFloodColor(), BF
     Else
