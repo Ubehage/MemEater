@@ -202,7 +202,7 @@ Private Sub DisplayTimer_Timer()
   MemViewer1.Refresh
   If TickCounter = 1 Then
     CheckActiveProcesses
-    cmdConsume.Enabled = IIf(ActiveClients >= MaxMemoryGB, False, True)
+    If Not IsWorking Then cmdConsume.Enabled = IIf(ActiveClients >= MaxMemoryGB, False, True)
     TickCounter = 0
   Else
     TickCounter = 1
