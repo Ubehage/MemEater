@@ -108,7 +108,7 @@ Public Function ReadFromSharedMemory(Optional ReadAllData As Boolean = False, Op
     If ReadOnlyClientData = True Then
       CopyMemory SharedMemory.Instances(mOff).ClienData, mAddr, LenB(SharedMemory.Instances(mOff).ClienData)
     ElseIf ReadOnlyAppData = True Then
-      mAddr = (mOff + SHAREDMEM_HALFSIZE)
+      mAddr = (mAddr + SHAREDMEM_HALFSIZE)
       CopyMemory SharedMemory.Instances(mOff).AppData, mAddr, LenB(SharedMemory.Instances(mOff).AppData)
     Else
       CopyMemory SharedMemory.Instances(mOff), mAddr, LenB(SharedMemory.Instances(mOff))
@@ -200,3 +200,4 @@ Public Sub ClientConsumeMemory(cIndex As Long, BytesToConsume As Long)
   End With
   Call WriteToSharedMemory(False, True, False, cIndex)
 End Sub
+
