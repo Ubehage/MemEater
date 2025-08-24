@@ -50,6 +50,7 @@ Friend Sub ConsumeMemory(BytesToConsume As Long)
       cB = (cB - .Size)
       ReDim .Data(1 To .Size) As Byte
     End With
+    If ExitNow Then Exit Do
   Loop
 End Sub
 
@@ -89,17 +90,21 @@ Private Sub GoThroughMemory()
         .Data(j) = .Data(j) Xor &HFF
       Next
     End With
+    If ExitNow Then Exit For
   Next
 End Sub
 
 Private Sub CheckAppMessages()
-  Dim updMem As Boolean
+  Dim updMem As Boolean, c As Long, v As Long
+  c = 0
+  v = 0
   If ReadFromSharedMemory(False, True) = True Then
     With SharedMemory.Instances(SharedMemOffset)
       Select Case .ClienData.mData1
         Case MEMMSG_CONSUME
           If .ClienData.mData2 > 0 Then
-            ConsumeMemory .ClienData.mData2
+            c = MEMMSG_CONSUME
+            v = .ClienData.mData2
             .ClienData.mData1 = MEMMSG_SUCCESS
           Else
             .ClienData.mData1 = MEMMSG_ERROR
@@ -108,7 +113,7 @@ Private Sub CheckAppMessages()
           updMem = True
         Case MEMMSG_RELEASE
           If MemItems > 0 Then
-            ReleaseMemory
+            c = MEMMSG_RELEASE
             .ClienData.mData1 = MEMMSG_SUCCESS
           Else
             .ClienData.mData1 = MEMMSG_ERROR
@@ -121,13 +126,19 @@ Private Sub CheckAppMessages()
       End Select
     End With
     If updMem Then Call WriteToSharedMemory(False, True)
+    Select Case c
+      Case MEMMSG_CONSUME
+        ConsumeMemory v
+      Case MEMMSG_RELEASE
+        ReleaseMemory
+    End Select
   End If
 End Sub
 
 Private Sub ClientTimer_Timer()
   ClientTimer.Enabled = False
-  CheckAppMessages
   If ExitNow Then Unload Me
+  CheckAppMessages
   If MemItems > 0 Then GoThroughMemory
   If Not ClientTimer Is Nothing Then ClientTimer.Enabled = True
 End Sub
