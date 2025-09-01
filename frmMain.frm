@@ -225,19 +225,8 @@ Private Sub Form_Unload(Cancel As Integer)
     ExitNow = True
   Else
     KillDisplayTimer
+    If ActiveClients > 0 Then ReleaseAllClients
     WindowOnTop Me.hWnd, False
-    If ActiveClients > 0 Then
-      Select Case MsgBox("There are active memory processes. Close them and free memory?", vbYesNoCancel Or vbQuestion Or vbMsgBoxSetForeground Or vbDefaultButton2, APP_NAME)
-        Case vbYes
-          ReleaseAllClients
-        Case vbCancel
-          Cancel = 1
-          ExitNow = False
-          SetDisplayTimer
-          WindowOnTop Me.hWnd, True
-          Exit Sub
-      End Select
-    End If
     UnloadAll
   End If
 End Sub
