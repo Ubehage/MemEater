@@ -210,20 +210,6 @@ Public Function LaunchClientWithIndex(NewIndex As Long) As Boolean
   LaunchClientWithIndex = RunCommandLine(GetNewCommandLine(NewIndex))
 End Function
 
-Public Sub CloseLastClient()
-  Dim i As Long
-  Call ReadFromSharedMemory(True)
-  With SharedMemory
-    For i = UBound(.Instances) To 1 Step -1
-      If IsProcessAlive(.Instances(i).AppData.mData2) = True Then
-        .Instances(i).ClienData.mData1 = MEMMSG_EXIT
-        Call WriteToSharedMemory(True)
-        Exit For
-      End If
-    Next
-  End With
-End Sub
-
 Public Function GetNextCommandLine() As String
   GetNextCommandLine = GetNewCommandLine(GetNextAvailableOffset())
 End Function

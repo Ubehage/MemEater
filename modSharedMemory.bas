@@ -191,6 +191,19 @@ Public Sub ReleaseAllClients()
   Call WriteToSharedMemory(True)
 End Sub
 
+Public Sub CloseLastClient()
+  Dim i As Long
+  With SharedMemory
+    For i = UBound(.Instances) To 1 Step -1
+      If IsProcessAlive(.Instances(i).AppData.mData2) = True Then
+        .Instances(i).ClienData.mData1 = MEMMSG_EXIT
+        Call WriteToSharedMemory(False, True, False, i)
+        Exit For
+      End If
+    Next
+  End With
+End Sub
+
 Public Sub ClientConsumeMemory(cIndex As Long, BytesToConsume As Long)
   If (cIndex <= 0 Or cIndex >= UBound(SharedMemory.Instances)) Then Exit Sub
   With SharedMemory.Instances(cIndex).ClienData
