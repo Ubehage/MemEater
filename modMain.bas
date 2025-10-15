@@ -69,6 +69,7 @@ Private Function Start() As Integer
     End If
     If OpenSharedMemory() = False Then
       Call MsgBox("There was a problem reading shared memory." & vbCrLf & "This program cannot continue.", vbOKOnly Or vbCritical, APP_NAME)
+      UnloadAll
       Exit Function
     End If
     Start = 2
@@ -208,6 +209,20 @@ Public Function LaunchClientWithIndex(NewIndex As Long) As Boolean
   If NewIndex <= 0 Then Exit Function
   LaunchClientWithIndex = RunCommandLine(GetNewCommandLine(NewIndex))
 End Function
+
+Public Sub CloseLastClient()
+  Dim i As Long
+  Call ReadFromSharedMemory(True)
+  With SharedMemory
+    For i = UBound(.Instances) To 1 Step -1
+      If IsProcessAlive(.Instances(i).AppData.mData2) = True Then
+        .Instances(i).ClienData.mData1 = MEMMSG_EXIT
+        Call WriteToSharedMemory(True)
+        Exit For
+      End If
+    Next
+  End With
+End Sub
 
 Public Function GetNextCommandLine() As String
   GetNextCommandLine = GetNewCommandLine(GetNextAvailableOffset())

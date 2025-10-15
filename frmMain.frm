@@ -5,20 +5,31 @@ Begin VB.Form frmMain
    ClientHeight    =   5130
    ClientLeft      =   120
    ClientTop       =   465
-   ClientWidth     =   10380
+   ClientWidth     =   13470
    Icon            =   "frmMain.frx":0000
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
    MinButton       =   0   'False
    ScaleHeight     =   5130
-   ScaleWidth      =   10380
+   ScaleWidth      =   13470
    ShowInTaskbar   =   0   'False
    StartUpPosition =   3  'Windows Default
-   Begin MemEater2.Button cmdRelease 
+   Begin MemEater2.Button cmdReleaseGB 
+      Height          =   495
+      Left            =   6810
+      TabIndex        =   5
+      Top             =   4215
+      Width           =   2700
+      _ExtentX        =   4763
+      _ExtentY        =   873
+      Caption         =   "Release 1GB"
+      Enabled         =   "True"
+   End
+   Begin MemEater2.Button cmdReleaseAll 
       Height          =   525
-      Left            =   6450
+      Left            =   10050
       TabIndex        =   4
-      Top             =   4275
+      Top             =   4155
       Width           =   3585
       _ExtentX        =   6324
       _ExtentY        =   926
@@ -94,6 +105,7 @@ Friend Sub SetForm()
   Me.Caption = APP_NAME
   Me.Show
   MoveObjects
+  CheckClientButtons
 End Sub
 
 Friend Sub SetDisplayTimer()
@@ -115,21 +127,29 @@ Private Sub MoveObjects()
   MemViewer1.Move Status1.Left, ((Status1.Top + Status1.Height) + (Screen.TwipsPerPixelY * 3)), Status1.Width
   cmdConsume.Height = (Screen.TwipsPerPixelY * BUTTON_HEIGHT)
   cmdGB.Height = cmdConsume.Height
-  cmdRelease.Height = cmdGB.Height
-  cmdRelease.Top = ((MemViewer1.Top + MemViewer1.Height) + (Screen.TwipsPerPixelY * 10))
-  cmdRelease.Left = Status1.Left
+  cmdReleaseGB.Height = cmdGB.Height
+  cmdReleaseAll.Height = cmdReleaseGB.Height
+  cmdReleaseAll.Top = ((MemViewer1.Top + MemViewer1.Height) + (Screen.TwipsPerPixelY * 10))
+  cmdReleaseAll.Left = Status1.Left
   With MinimumFormSize
-    If .Y = 0 Then .Y = ((cmdRelease.Top + cmdRelease.Height) + Status1.Top)
+    If .Y = 0 Then .Y = ((cmdReleaseAll.Top + cmdReleaseAll.Height) + Status1.Top)
     If .x = 0 Then .x = GetMinimumButtonWidth()
   End With
-  cmdConsume.Top = cmdRelease.Top
-  cmdConsume.Left = (Me.ScaleWidth - (cmdConsume.Width + cmdRelease.Left))
-  cmdGB.Top = cmdConsume.Top
+  cmdConsume.Top = cmdReleaseAll.Top
+  cmdConsume.Left = (Me.ScaleWidth - (cmdConsume.Width + cmdReleaseAll.Left))
+  cmdReleaseGB.Top = cmdConsume.Top
+  cmdGB.Top = cmdReleaseGB.Top
   Dim t As RECT
   With t
-    .Left = ((cmdRelease.Left + cmdRelease.Width) + (Screen.TwipsPerPixelX * BUTTON_SPACING))
+    .Left = ((cmdReleaseAll.Left + cmdReleaseAll.Width) + (Screen.TwipsPerPixelX * BUTTON_SPACING))
     .Right = (cmdConsume.Left - (Screen.TwipsPerPixelX * BUTTON_SPACING))
-    cmdGB.Left = (.Left + ((.Right - .Left) - cmdGB.Width) \ 2)
+    
+    Dim spacing As Long
+    spacing = (((.Right - .Left) - (cmdGB.Width + cmdReleaseGB.Width)) / 3)
+    cmdReleaseGB.Left = (.Left + spacing)
+    cmdGB.Left = ((cmdReleaseGB.Left + cmdReleaseGB.Width) + spacing)
+    
+    'cmdGB.Left = (.Left + ((.Right - .Left) - cmdGB.Width) \ 2)
   End With
 End Sub
 
@@ -138,13 +158,20 @@ Private Function GetMinimumButtonWidth() As Long
   s = (Screen.TwipsPerPixelX * BUTTON_SPACING)
   r = (cmdConsume.Width + s)
   r = (r + (cmdGB.Width + s))
-  GetMinimumButtonWidth = (r + cmdRelease.Width)
+  r = (r + (cmdReleaseGB.Width + s))
+  GetMinimumButtonWidth = (r + cmdReleaseAll.Width)
 End Function
 
 Private Sub EnableButtons(DoEnable As Boolean)
   cmdConsume.Enabled = DoEnable
   cmdGB.Enabled = DoEnable
-  cmdRelease.Enabled = DoEnable
+  cmdReleaseAll.Enabled = DoEnable
+End Sub
+
+Private Sub CheckClientButtons()
+  cmdConsume.Enabled = IIf(ActiveClients >= MaxMemoryGB, False, True)
+  cmdReleaseGB.Enabled = IIf(ActiveClients > 0, True, False)
+  cmdReleaseAll.Enabled = IIf(ActiveClients > 0, True, False)
 End Sub
 
 Private Sub cmdConsume_Click()
@@ -190,10 +217,14 @@ GBError:
   MsgBox "Could not complete the task!" & vbCrLf & "Unknown error", vbOKOnly Or vbCritical, APP_NAME
 End Sub
 
-Private Sub cmdRelease_Click()
+Private Sub cmdReleaseAll_Click()
   If Not DisplayTimer Is Nothing Then DisplayTimer.Enabled = False
   ReleaseAllClients
   If Not DisplayTimer Is Nothing Then DisplayTimer.Enabled = True
+End Sub
+
+Private Sub cmdReleaseGB_Click()
+  CloseLastClient
 End Sub
 
 Private Sub DisplayTimer_Timer()
@@ -202,7 +233,9 @@ Private Sub DisplayTimer_Timer()
   MemViewer1.Refresh
   If TickCounter = 1 Then
     CheckActiveProcesses
-    If Not IsWorking Then cmdConsume.Enabled = IIf(ActiveClients >= MaxMemoryGB, False, True)
+    If Not IsWorking Then
+      CheckClientButtons
+    End If
     TickCounter = 0
   Else
     TickCounter = 1

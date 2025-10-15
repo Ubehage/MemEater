@@ -10,9 +10,9 @@ Global Const MEMMSG_ERROR As Long = &HFFAA
 Private Const PAGE_READWRITE As Long = &H4&
 Private Const FILE_MAP_ALL_ACCESS As Long = &HF001F
 
-Private Const SHAREDMEM_SIZE As Long = SIZE_KILO * 16
 Global Const SHAREDMEM_NAME = "Local\UbeMemEater"
 Private Const SHAREDMEM_DATASIZE As Long = 16
+Private Const SHAREDMEM_SIZE As Long = SIZE_KILO * SHAREDMEM_DATASIZE
 Private Const SHAREDMEM_HALFSIZE As Long = SHAREDMEM_DATASIZE / 2
 
 Public Type SHAREDMEM_DATA
@@ -46,7 +46,6 @@ Public Function OpenSharedMemory() As Boolean
   SharedMemHandle = CreateFileMapping(INVALID_HANDLE_VALUE, 0, PAGE_READWRITE, 0, SHAREDMEM_SIZE, SHAREDMEM_NAME)
   If SharedMemHandle = 0 Then Exit Function
   If Err.LastDllError() = ERROR_ALREADY_EXISTS Then e = True
-  'If GetLastError() = ERROR_ALREADY_EXISTS Then e = True
   SharedMemBase = MapViewOfFile(SharedMemHandle, FILE_MAP_ALL_ACCESS, 0, 0, 0)
   If SharedMemBase = 0 Then
     Call CloseSharedMemory
@@ -99,19 +98,19 @@ End Function
 Public Function ReadFromSharedMemory(Optional ReadAllData As Boolean = False, Optional ReadOnlyClientData As Boolean = False, Optional ReadOnlyAppData As Boolean = False, Optional bOffset As Long = -1) As Boolean
   If SharedMemBase = 0 Then Exit Function
   If ReadAllData = True Then
-    CopyMemory SharedMemory, SharedMemBase, LenB(SharedMemory)
+    CopyMemory SharedMemory, ByVal SharedMemBase, LenB(SharedMemory)
   Else
     Dim mAddr As Long, mOff As Long
     mOff = IIf(bOffset = -1, SharedMemOffset, bOffset)
     If (mOff < LBound(SharedMemory.Instances) Or mOff > UBound(SharedMemory.Instances)) Then Exit Function
     mAddr = (SharedMemBase + (mOff * SHAREDMEM_DATASIZE))
     If ReadOnlyClientData = True Then
-      CopyMemory SharedMemory.Instances(mOff).ClienData, mAddr, LenB(SharedMemory.Instances(mOff).ClienData)
+      CopyMemory SharedMemory.Instances(mOff).ClienData, ByVal mAddr, LenB(SharedMemory.Instances(mOff).ClienData)
     ElseIf ReadOnlyAppData = True Then
       mAddr = (mAddr + SHAREDMEM_HALFSIZE)
-      CopyMemory SharedMemory.Instances(mOff).AppData, mAddr, LenB(SharedMemory.Instances(mOff).AppData)
+      CopyMemory SharedMemory.Instances(mOff).AppData, ByVal mAddr, LenB(SharedMemory.Instances(mOff).AppData)
     Else
-      CopyMemory SharedMemory.Instances(mOff), mAddr, LenB(SharedMemory.Instances(mOff))
+      CopyMemory SharedMemory.Instances(mOff), ByVal mAddr, LenB(SharedMemory.Instances(mOff))
     End If
   End If
   ReadFromSharedMemory = True
@@ -200,4 +199,3 @@ Public Sub ClientConsumeMemory(cIndex As Long, BytesToConsume As Long)
   End With
   Call WriteToSharedMemory(False, True, False, cIndex)
 End Sub
-
