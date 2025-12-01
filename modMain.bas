@@ -46,14 +46,14 @@ Sub Main()
   Call InitCommonControls
   s = Start
   If s = 0 Then Exit Sub
-  SharedMemory.Instances(SharedMemOffset).AppData.mData2 = GetMypId
-  Call WriteToSharedMemory(False, False, True)
   Select Case s
     Case 1
       LoadMainForm
     Case 2
       StartClient
   End Select
+  SharedMemory.Instances(SharedMemOffset).AppData.mData2 = GetMypId
+  Call WriteToSharedMemory(False, False, True)
 End Sub
 
 Private Function Start() As Integer
