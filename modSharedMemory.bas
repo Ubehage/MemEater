@@ -146,8 +146,14 @@ Public Function GetNextAvailableOffset() As Long
   For i = 1 To UBound(SharedMemory.Instances)
     If SharedMemory.Instances(i).AppData.mData2 = 0 Then
       GetNextAvailableOffset = i
-      SharedMemory.Instances(i).AppData.mData2 = -1
-      WriteToSharedMemory False, False, True, i
+      With SharedMemory.Instances(i)
+        .AppData.mData2 = -1
+        With .ClientData
+          .mData1 = 0
+          .mData2 = 0
+        End With
+      End With
+      WriteToSharedMemory False, False, False, i
       Exit For
     End If
   Next
