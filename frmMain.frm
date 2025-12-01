@@ -144,7 +144,7 @@ Private Sub MoveObjects()
   cmdReleaseAll.Top = ((MemViewer1.Top + MemViewer1.Height) + (Screen.TwipsPerPixelY * 10))
   cmdReleaseAll.Left = Status1.Left
   With MinimumFormSize
-    If .y = 0 Then .y = ((cmdReleaseAll.Top + cmdReleaseAll.Height) + Status1.Top)
+    If .Y = 0 Then .Y = ((cmdReleaseAll.Top + cmdReleaseAll.Height) + Status1.Top)
     If .x = 0 Then .x = GetMinimumButtonWidth()
   End With
   cmdConsume.Top = cmdReleaseAll.Top
@@ -254,7 +254,7 @@ Private Sub cmdReleaseAll_Click()
 End Sub
 
 Private Sub cmdReleaseGB_Click()
-  CloseLastClient
+  CloseFirstClient
 End Sub
 
 Private Sub DisplayTimer_Timer()
@@ -278,7 +278,7 @@ Private Sub Form_Resize()
   MoveObjects
   With MinimumFormSize
     If Me.ScaleWidth < .x Then Me.Width = ((Me.Width - Me.ScaleWidth) + .x): Exit Sub
-    If Me.ScaleHeight <> .y Then Me.Height = ((Me.Height - Me.ScaleHeight) + .y): Exit Sub
+    If Me.ScaleHeight <> .Y Then Me.Height = ((Me.Height - Me.ScaleHeight) + .Y): Exit Sub
   End With
 End Sub
 
