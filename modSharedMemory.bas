@@ -224,42 +224,12 @@ Public Sub CloseOneClient(FirstOrLast As FirstOrLast_data)
                                 'VB6 is sometimes weird.
                                 
     For i = iFrom To iTo Step iStep
-      If IsProcessAlive(.Instances(i).AppData.mData2) = True Then
-        .Instances(i).ClientData.mData1 = MEMMSG_EXIT
-        Call WriteToSharedMemory(False, True, False, i)
-        Exit For
-      End If
-    Next
-  End With
-End Sub
-
-'This function is no longer used.
-'It is obsolete, since CloseOneClient() does the job.
-Public Sub CloseFirstClient()
-  Dim i As Long
-  Call ReadFromSharedMemory(True)
-  With SharedMemory
-    For i = 1 To UBound(.Instances)
-      If IsProcessAlive(.Instances(i).AppData.mData2) = True Then
-        .Instances(i).ClientData.mData1 = MEMMSG_EXIT
-        Call WriteToSharedMemory(False, True, False, i)
-        Exit For
-      End If
-    Next
-  End With
-End Sub
-
-'This function is no longer used.
-'It is obsolete, since CloseOneClient() does the job.
-Public Sub CloseLastClient()
-  Dim i As Long
-  Call ReadFromSharedMemory(True)
-  With SharedMemory
-    For i = UBound(.Instances) To 1 Step -1
-      If IsProcessAlive(.Instances(i).AppData.mData2) = True Then
-        .Instances(i).ClientData.mData1 = MEMMSG_EXIT
-        Call WriteToSharedMemory(False, True, False, i)
-        Exit For
+      If IsProcessAlive(.Instances(i).AppData.mData2) = True Then 'Check if this instance is a running process.
+        If .Instances(i).ClientData.mData1 <> MEMMSG_EXIT Then    'Check if this instance has already been ordered to exit.
+          .Instances(i).ClientData.mData1 = MEMMSG_EXIT
+          Call WriteToSharedMemory(False, True, False, i)
+          Exit For
+        End If
       End If
     Next
   End With
