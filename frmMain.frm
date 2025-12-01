@@ -254,7 +254,7 @@ Private Sub cmdReleaseAll_Click()
 End Sub
 
 Private Sub cmdReleaseGB_Click()
-  CloseFirstClient
+  CloseOneClient flFirst
 End Sub
 
 Private Sub DisplayTimer_Timer()

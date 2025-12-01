@@ -27,6 +27,11 @@ Public Type SHARED_MEMORY_LAYOUT
   Instances(0 To 1023) As SHAREDMEM_ITEM
 End Type
 
+Public Enum FirstOrLast_data
+  flFirst = &H0
+  flLast = &H1
+End Enum
+
 Private Declare Function CreateFileMapping Lib "kernel32" Alias "CreateFileMappingA" (ByVal hFile As Long, ByVal lpFileMappingAttributes As Long, ByVal flProtect As Long, ByVal dwMaximumSizeHigh As Long, ByVal dwMaximumSizeLow As Long, ByVal lpName As String) As Long
 Private Declare Function OpenFileMapping Lib "kernel32" Alias "OpenFileMappingA" (ByVal dwDesiredAccess As Long, ByVal bInheritHandle As Long, ByVal lpName As String) As Long
 Private Declare Function MapViewOfFile Lib "kernel32" (ByVal hFileMappingObject As Long, ByVal dwDesiredAccess As Long, ByVal dwFileOffsetHigh As Long, ByVal dwFileOffsetLow As Long, ByVal dwNumberOfBytesToMap As Long) As Long
@@ -185,12 +190,40 @@ Public Sub ReleaseAllClients()
   With SharedMemory
     For i = 1 To UBound(.Instances)
       .Instances(i).ClienData.mData1 = MEMMSG_EXIT
-      'Call WriteToSharedMemory(False, True, False, i)
     Next
   End With
   Call WriteToSharedMemory(True)
 End Sub
 
+Public Sub CloseOneClient(FirstOrLast As FirstOrLast_data)
+  Dim i As Long, iFrom As Long, iTo As Long, iStep As Integer
+  Call ReadFromSharedMemory(True)
+  With SharedMemory
+    If FirstOrLast = flFirst Then
+      iFrom = 1
+      iTo = UBound(.Instances)
+      iStep = 1
+    ElseIf FirstOrLast = flLast Then
+      iFrom = UBound(.Instances)
+      iTo = 1
+      iStep = -1
+    End If
+    If iStep = 0 Then Exit Sub  'Preventing an infinite loop.
+                                'Although this should logically never be necessary,
+                                'VB6 is sometimes weird.
+                                
+    For i = iFrom To iTo Step iStep
+      If IsProcessAlive(.Instances(i).AppData.mData2) = True Then
+        .Instances(i).ClienData.mData1 = MEMMSG_EXIT
+        Call WriteToSharedMemory(False, True, False, i)
+        Exit For
+      End If
+    Next
+  End With
+End Sub
+
+'This function is no longer used.
+'It is obsolete, since CloseOneClient() does the job.
 Public Sub CloseFirstClient()
   Dim i As Long
   Call ReadFromSharedMemory(True)
@@ -205,6 +238,8 @@ Public Sub CloseFirstClient()
   End With
 End Sub
 
+'This function is no longer used.
+'It is obsolete, since CloseOneClient() does the job.
 Public Sub CloseLastClient()
   Dim i As Long
   Call ReadFromSharedMemory(True)
