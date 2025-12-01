@@ -11,20 +11,28 @@ Private Const PAGE_READWRITE As Long = &H4&
 Private Const FILE_MAP_ALL_ACCESS As Long = &HF001F
 
 Global Const SHAREDMEM_NAME = "Local\UbeMemEater"
+Private Const SHAREDMEM_INSTANCES = SIZE_KILO
 Private Const SHAREDMEM_DATASIZE As Long = 16
-Private Const SHAREDMEM_SIZE As Long = SIZE_KILO * SHAREDMEM_DATASIZE
+Private Const SHAREDMEM_SIZE As Long = SHAREDMEM_INSTANCES * SHAREDMEM_DATASIZE
 Private Const SHAREDMEM_HALFSIZE As Long = SHAREDMEM_DATASIZE / 2
 
 Public Type SHAREDMEM_DATA
   mData1 As Long
   mData2 As Long
 End Type
+
 Public Type SHAREDMEM_ITEM
-  ClienData As SHAREDMEM_DATA
+  ClientData As SHAREDMEM_DATA
+  'mData1 is used for messages/orders from the main window.
+  'mData2 is used for specifying the size of consumed memory. A whole number of bytes.
+  
   AppData As SHAREDMEM_DATA
+  'mData1 is unused.
+  'mData2 is used for storing process pID.
 End Type
+
 Public Type SHARED_MEMORY_LAYOUT
-  Instances(0 To 1023) As SHAREDMEM_ITEM
+  Instances(0 To (SHAREDMEM_INSTANCES - 1)) As SHAREDMEM_ITEM 'Making room for 1023 instances, up to 1TB of consumed memory.
 End Type
 
 Public Enum FirstOrLast_data
@@ -89,7 +97,7 @@ Public Function WriteToSharedMemory(Optional WriteAllData As Boolean = False, Op
     If (mOff < LBound(SharedMemory.Instances) Or mOff > UBound(SharedMemory.Instances)) Then Exit Function
     mAddr = (SharedMemBase + (mOff * SHAREDMEM_DATASIZE))
     If WriteOnlyClientData = True Then
-      CopyMemoryByVal mAddr, SharedMemory.Instances(mOff).ClienData, LenB(SharedMemory.Instances(mOff).ClienData)
+      CopyMemoryByVal mAddr, SharedMemory.Instances(mOff).ClientData, LenB(SharedMemory.Instances(mOff).ClientData)
     ElseIf WriteOnlyAppData = True Then
       mAddr = (mAddr + SHAREDMEM_HALFSIZE)
       CopyMemoryByVal mAddr, SharedMemory.Instances(mOff).AppData, LenB(SharedMemory.Instances(mOff).AppData)
@@ -110,7 +118,7 @@ Public Function ReadFromSharedMemory(Optional ReadAllData As Boolean = False, Op
     If (mOff < LBound(SharedMemory.Instances) Or mOff > UBound(SharedMemory.Instances)) Then Exit Function
     mAddr = (SharedMemBase + (mOff * SHAREDMEM_DATASIZE))
     If ReadOnlyClientData = True Then
-      CopyMemory SharedMemory.Instances(mOff).ClienData, ByVal mAddr, LenB(SharedMemory.Instances(mOff).ClienData)
+      CopyMemory SharedMemory.Instances(mOff).ClientData, ByVal mAddr, LenB(SharedMemory.Instances(mOff).ClientData)
     ElseIf ReadOnlyAppData = True Then
       mAddr = (mAddr + SHAREDMEM_HALFSIZE)
       CopyMemory SharedMemory.Instances(mOff).AppData, ByVal mAddr, LenB(SharedMemory.Instances(mOff).AppData)
@@ -187,12 +195,15 @@ End Function
 
 Public Sub ReleaseAllClients()
   Dim i As Long
+  Call ReadFromSharedMemory(True)
   With SharedMemory
     For i = 1 To UBound(.Instances)
-      .Instances(i).ClienData.mData1 = MEMMSG_EXIT
+      If .Instances(i).AppData.mData2 <> 0 Then
+        .Instances(i).ClientData.mData1 = MEMMSG_EXIT
+        Call WriteToSharedMemory(False, True, False, i)
+      End If
     Next
   End With
-  Call WriteToSharedMemory(True)
 End Sub
 
 Public Sub CloseOneClient(FirstOrLast As FirstOrLast_data)
@@ -214,7 +225,7 @@ Public Sub CloseOneClient(FirstOrLast As FirstOrLast_data)
                                 
     For i = iFrom To iTo Step iStep
       If IsProcessAlive(.Instances(i).AppData.mData2) = True Then
-        .Instances(i).ClienData.mData1 = MEMMSG_EXIT
+        .Instances(i).ClientData.mData1 = MEMMSG_EXIT
         Call WriteToSharedMemory(False, True, False, i)
         Exit For
       End If
@@ -230,7 +241,7 @@ Public Sub CloseFirstClient()
   With SharedMemory
     For i = 1 To UBound(.Instances)
       If IsProcessAlive(.Instances(i).AppData.mData2) = True Then
-        .Instances(i).ClienData.mData1 = MEMMSG_EXIT
+        .Instances(i).ClientData.mData1 = MEMMSG_EXIT
         Call WriteToSharedMemory(False, True, False, i)
         Exit For
       End If
@@ -246,7 +257,7 @@ Public Sub CloseLastClient()
   With SharedMemory
     For i = UBound(.Instances) To 1 Step -1
       If IsProcessAlive(.Instances(i).AppData.mData2) = True Then
-        .Instances(i).ClienData.mData1 = MEMMSG_EXIT
+        .Instances(i).ClientData.mData1 = MEMMSG_EXIT
         Call WriteToSharedMemory(False, True, False, i)
         Exit For
       End If
@@ -256,7 +267,7 @@ End Sub
 
 Public Sub ClientConsumeMemory(cIndex As Long, BytesToConsume As Long)
   If (cIndex <= 0 Or cIndex >= UBound(SharedMemory.Instances)) Then Exit Sub
-  With SharedMemory.Instances(cIndex).ClienData
+  With SharedMemory.Instances(cIndex).ClientData
     .mData1 = MEMMSG_CONSUME
     .mData2 = BytesToConsume
   End With

@@ -100,28 +100,28 @@ Private Sub CheckAppMessages()
   v = 0
   If ReadFromSharedMemory(False, True) = True Then
     With SharedMemory.Instances(SharedMemOffset)
-      Select Case .ClienData.mData1
+      Select Case .ClientData.mData1
         Case MEMMSG_CONSUME
-          If .ClienData.mData2 > 0 Then
+          If .ClientData.mData2 > 0 Then
             c = MEMMSG_CONSUME
-            v = .ClienData.mData2
-            .ClienData.mData1 = MEMMSG_SUCCESS
+            v = .ClientData.mData2
+            .ClientData.mData1 = MEMMSG_SUCCESS
           Else
-            .ClienData.mData1 = MEMMSG_ERROR
+            .ClientData.mData1 = MEMMSG_ERROR
           End If
-          .ClienData.mData2 = 0
+          .ClientData.mData2 = 0
           updMem = True
         Case MEMMSG_RELEASE
           If MemItems > 0 Then
             c = MEMMSG_RELEASE
-            .ClienData.mData1 = MEMMSG_SUCCESS
+            .ClientData.mData1 = MEMMSG_SUCCESS
           Else
-            .ClienData.mData1 = MEMMSG_ERROR
+            .ClientData.mData1 = MEMMSG_ERROR
           End If
           updMem = True
         Case MEMMSG_EXIT
           ExitNow = True
-          .ClienData.mData1 = MEMMSG_SUCCESS
+          .ClientData.mData1 = MEMMSG_SUCCESS
           updMem = True
       End Select
     End With

@@ -199,24 +199,25 @@ Private Sub ConsumeNumberOfGB(NumGB As Long)
   'Disable all buttons. We don't want the user to mess things up.
   EnableButtons False
   
-  Set l = New Collection
   Status1.Line3 = "Preparing child processes"
+  Set l = New Collection
   For i = 1 To NumGB
     Status1.Line3 = Status1.Line3 & "."
     DoEvents
     
     'Check if user closed the window
-    If ExitNow Then GoTo ExitConsume
+    If ExitNow Then Exit For
     
     c = LaunchNewClient()
     If c = 0 Then Exit For
     l.Add c
   Next
-  Do Until l.Count = 0
-    ClientConsumeMemory l.Item(1), SIZE_GIGA
-    l.Remove 1
-  Loop
-ExitConsume:
+  If Not ExitNow Then
+    Do Until l.Count = 0
+      ClientConsumeMemory l.Item(1), SIZE_GIGA
+      l.Remove 1
+    Loop
+  End If
   Set l = Nothing
   Status1.Line3 = ""
   
@@ -238,13 +239,13 @@ Private Sub cmdCustomGB_Click()
 End Sub
 
 Private Sub cmdGB_Click()
-  Dim nIndex As Long
-  nIndex = LaunchNewClient()
-  If nIndex = 0 Then GoTo GBError
-  ClientConsumeMemory nIndex, SIZE_GIGA
-  Exit Sub
-GBError:
-  MsgBox "Could not complete the task!" & vbCrLf & "Unknown error", vbOKOnly Or vbCritical, APP_NAME
+  Dim c As Long
+  c = LaunchNewClient()
+  If c = 0 Then
+    MsgBox "Could not complete the task!" & vbCrLf & "Unknown error", vbOKOnly Or vbCritical, APP_NAME
+  Else
+    ClientConsumeMemory c, SIZE_GIGA
+  End If
 End Sub
 
 Private Sub cmdReleaseAll_Click()

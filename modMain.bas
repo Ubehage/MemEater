@@ -57,37 +57,34 @@ Sub Main()
 End Sub
 
 Private Function Start() As Integer
-  SplitCommandLine Command
+  Dim e As Boolean 'Exit flag. If set, terminate immediately.
   
-  '#Debug
-  'SplitCommandLine GetCommandLineParameters(1)
-  
-  If RunNow Then
-    If SharedMemOffset = 0 Then
-      Call MsgBox("Error: Missing shared memory!" & vbCrLf & "This program cannot continue.", vbOKOnly Or vbCritical, APP_NAME)
-      Exit Function
-    End If
-    If OpenSharedMemory() = False Then
-      Call MsgBox("There was a problem reading shared memory." & vbCrLf & "This program cannot continue.", vbOKOnly Or vbCritical, APP_NAME)
-      UnloadAll
-      Exit Function
-    End If
-    Start = 2
-  Else
-    If SharedMemOffset <> 0 Then
-      Call MsgBox("Error in command-line!" & vbCrLf & vbCrLf & "This program cannot continue.", vbOKOnly Or vbCritical, APP_NAME)
-      Exit Function
-    End If
-    If OpenSharedMemory() = False Then
-      Call MsgBox("There was a problem reading shared memory." & vbCrLf & "This program cannot continue.", vbOKOnly Or vbCritical, APP_NAME)
-      Exit Function
-    End If
-    If CheckPrevInstance = False Then
-      MsgBox "You may only run one instance of this program!", vbOKOnly Or vbInformation, APP_NAME
-      Exit Function
-    End If
-    Start = 1
+  If OpenSharedMemory() = False Then
+    Call MsgBox("There was a problem reading shared memory." & vbCrLf & "This program cannot continue.", vbOKOnly Or vbCritical, APP_NAME)
+    e = True
   End If
+  If e = False Then
+    SplitCommandLine Command
+    If RunNow = True Then
+      If SharedMemOffset = 0 Then
+        Call MsgBox("Error: Missing shared memory!" & vbCrLf & "This program cannot continue.", vbOKOnly Or vbCritical, APP_NAME)
+        e = True
+      End If
+    Else
+      If SharedMemOffset <> 0 Then
+        Call MsgBox("Error in command-line!" & vbCrLf & vbCrLf & "This program cannot continue.", vbOKOnly Or vbCritical, APP_NAME)
+        e = True
+      ElseIf CheckPrevInstance() = False Then
+        Call MsgBox("You can only run one instance of this program!", vbOKOnly Or vbInformation, APP_NAME)
+        e = True
+      End If
+    End If
+  End If
+  If e = True Then
+    UnloadAll
+    Exit Function
+  End If
+  If RunNow Then Start = 2 Else Start = 1
 End Function
 
 Private Function CheckPrevInstance() As Boolean
