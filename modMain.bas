@@ -65,6 +65,10 @@ Private Function Start() As Integer
   End If
   If e = False Then
     SplitCommandLine Command
+    
+    '#DEBUG
+    'SplitCommandLine GetNextCommandLineParameters()
+    
     If RunNow = True Then
       If SharedMemOffset = 0 Then
         Call MsgBox("Error: Missing shared memory!" & vbCrLf & "This program cannot continue.", vbOKOnly Or vbCritical, APP_NAME)
@@ -111,6 +115,8 @@ Private Sub StartClient()
 End Sub
 
 Public Sub UnloadAll()
+  SharedMemory.Instances(SharedMemOffset).AppData.mData2 = 0
+  Call WriteToSharedMemory(False, False, True)
   CloseSharedMemory
 End Sub
 
@@ -209,6 +215,10 @@ End Function
 
 Public Function GetNextCommandLine() As String
   GetNextCommandLine = GetNewCommandLine(GetNextAvailableOffset())
+End Function
+
+Private Function GetNextCommandLineParameters() As String
+  GetNextCommandLineParameters = GetCommandLineParameters(GetNextAvailableOffset())
 End Function
 
 Public Function GetNewCommandLine(iOffset As Long) As String

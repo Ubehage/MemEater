@@ -289,7 +289,7 @@ Private Sub Form_Unload(Cancel As Integer)
     ExitNow = True
   Else
     KillDisplayTimer
-    If ActiveClients > 0 Then ReleaseAllClients
+    'If ActiveClients > 0 Then ReleaseAllClients
     WindowOnTop Me.hWnd, False
     UnloadAll
   End If

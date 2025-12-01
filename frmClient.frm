@@ -135,18 +135,25 @@ Private Sub CheckAppMessages()
   End If
 End Sub
 
+Private Sub CheckMainProcess()
+  Call ReadFromSharedMemory(False, False, True, 0)
+  If IsProcessAlive(SharedMemory.Instances(0).AppData.mData2) = False Then ExitNow = True
+End Sub
+
+Private Sub UnloadClient()
+  ReleaseMemory
+  UnloadAll
+End Sub
+
 Private Sub ClientTimer_Timer()
   ClientTimer.Enabled = False
-  If ExitNow Then Unload Me
-  CheckAppMessages
+  CheckMainProcess
+  If ExitNow Then Unload Me Else CheckAppMessages
   If MemItems > 0 Then GoThroughMemory
   If Not ClientTimer Is Nothing Then ClientTimer.Enabled = True
 End Sub
 
 Private Sub Form_Unload(Cancel As Integer)
   KillClientTimer
-  ReleaseMemory
-  SharedMemory.Instances(SharedMemOffset).AppData.mData2 = 0
-  Call WriteToSharedMemory
-  UnloadAll
+  UnloadClient
 End Sub
