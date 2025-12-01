@@ -236,7 +236,7 @@ Public Sub CloseOneClient(FirstOrLast As FirstOrLast_data)
 End Sub
 
 Public Sub ClientConsumeMemory(cIndex As Long, BytesToConsume As Long)
-  If (cIndex <= 0 Or cIndex >= UBound(SharedMemory.Instances)) Then Exit Sub
+  If (cIndex <= 0 Or cIndex > UBound(SharedMemory.Instances)) Then Exit Sub
   With SharedMemory.Instances(cIndex).ClientData
     .mData1 = MEMMSG_CONSUME
     .mData2 = BytesToConsume
