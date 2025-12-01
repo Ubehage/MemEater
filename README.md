@@ -10,6 +10,7 @@ It is designed to intentionally overload system memory, allowing users and devel
 - **Custom Memory Load:** 
   - Consume all available memory in one click.
   - Consume memory in 1GB increments.
+  - Consume an arbitrary number of GB at once via the "Consume Multiple GB..." dialog.
   - Release memory in 1GB decrements.
   - Instantly release all consumed memory.
 - **Real-Time Stats:** 

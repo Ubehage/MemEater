@@ -61,7 +61,7 @@ End Type
 
 Public Type POINTAPI
   x As Long
-  Y As Long
+  y As Long
 End Type
 
 Public Type RECT
@@ -71,7 +71,7 @@ Public Type RECT
   Bottom As Long
 End Type
 
-Private Declare Function SetWindowPos Lib "user32.dll" (ByVal hWnd As Long, ByVal hWndInsertAfter As Long, ByVal x As Long, ByVal Y As Long, ByVal cX As Long, ByVal cy As Long, ByVal wFlags As Long) As Long
+Private Declare Function SetWindowPos Lib "user32.dll" (ByVal hWnd As Long, ByVal hWndInsertAfter As Long, ByVal x As Long, ByVal y As Long, ByVal cX As Long, ByVal cy As Long, ByVal wFlags As Long) As Long
 
 Private Declare Function SendMessage Lib "user32" Alias "SendMessageA" (ByVal hWnd As Long, ByVal wMsg As Long, ByVal wParam As Long, Param As Any) As Long
 Private Declare Sub InitCommonControls9x Lib "comctl32" Alias "InitCommonControls" ()
@@ -81,7 +81,7 @@ Public Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (ByRef lpDest
 Public Declare Sub ZeroMemory Lib "kernel32.dll" Alias "RtlZeroMemory" (Destination As Any, ByVal Length As Long)
 
 Public Declare Function GetCursorPos Lib "user32" (lpPoint As POINTAPI) As Long
-Public Declare Function WindowFromPoint Lib "user32" (ByVal x As Long, ByVal Y As Long) As Long
+Public Declare Function WindowFromPoint Lib "user32" (ByVal x As Long, ByVal y As Long) As Long
 Public Declare Function ClientToScreen Lib "user32" (ByVal hWnd As Long, lpPoint As POINTAPI) As Long
 Public Declare Function GetClientRect Lib "user32" (ByVal hWnd As Long, lpRect As RECT) As Long
 Public Declare Function SetCapture Lib "user32" (ByVal hWnd As Long) As Long
@@ -137,7 +137,7 @@ End Function
 Public Function IsPointInRect(pRect As RECT, pPoint As POINTAPI) As Boolean
   With pRect
     If (pPoint.x >= .Left And pPoint.x <= .Right) Then
-      If (pPoint.Y >= .Top And pPoint.Y <= .Bottom) Then IsPointInRect = True
+      If (pPoint.y >= .Top And pPoint.y <= .Bottom) Then IsPointInRect = True
     End If
   End With
 End Function

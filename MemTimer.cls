@@ -68,21 +68,16 @@ Public Property Let Enabled(ByVal NewEnabled As Boolean)
 End Property
 
 Public Property Get Interval() As Long
-   ' Return cached value.
    Interval = m_Interval
 End Property
 
 Public Property Let Interval(ByVal NewInterval As Long)
-   ' Cache passed value, and reset timer.
    If NewInterval >= 0 Then
       m_Interval = NewInterval
       Me.Enabled = m_Enabled
    End If
 End Property
 
-' ****************************************************
-'  Public Methods
-' ****************************************************
 Public Sub RaiseTimer()
    RaiseEvent Timer
 End Sub

@@ -193,6 +193,7 @@ End Sub
 
 Public Sub CloseLastClient()
   Dim i As Long
+  Call ReadFromSharedMemory(True)
   With SharedMemory
     For i = UBound(.Instances) To 1 Step -1
       If IsProcessAlive(.Instances(i).AppData.mData2) = True Then

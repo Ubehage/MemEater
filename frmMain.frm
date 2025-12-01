@@ -5,31 +5,42 @@ Begin VB.Form frmMain
    ClientHeight    =   5130
    ClientLeft      =   120
    ClientTop       =   465
-   ClientWidth     =   13470
+   ClientWidth     =   14310
    Icon            =   "frmMain.frx":0000
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
    MinButton       =   0   'False
    ScaleHeight     =   5130
-   ScaleWidth      =   13470
+   ScaleWidth      =   14310
    ShowInTaskbar   =   0   'False
    StartUpPosition =   3  'Windows Default
+   Begin MemEater2.Button cmdCustomGB 
+      Height          =   495
+      Left            =   7785
+      TabIndex        =   6
+      Top             =   4185
+      Width           =   2985
+      _ExtentX        =   5265
+      _ExtentY        =   873
+      Caption         =   "Consume Multiple GB..."
+      Enabled         =   "True"
+   End
    Begin MemEater2.Button cmdReleaseGB 
       Height          =   495
-      Left            =   6810
+      Left            =   3855
       TabIndex        =   5
-      Top             =   4215
-      Width           =   2700
-      _ExtentX        =   4763
+      Top             =   4170
+      Width           =   1890
+      _ExtentX        =   3334
       _ExtentY        =   873
       Caption         =   "Release 1GB"
       Enabled         =   "True"
    End
    Begin MemEater2.Button cmdReleaseAll 
       Height          =   525
-      Left            =   10050
+      Left            =   105
       TabIndex        =   4
-      Top             =   4155
+      Top             =   4200
       Width           =   3585
       _ExtentX        =   6324
       _ExtentY        =   926
@@ -49,21 +60,21 @@ Begin VB.Form frmMain
       Line3           =   ""
    End
    Begin MemEater2.Button cmdGB 
-      Height          =   435
-      Left            =   3615
+      Height          =   450
+      Left            =   5820
       TabIndex        =   2
-      Top             =   4155
-      Width           =   2730
-      _ExtentX        =   4815
-      _ExtentY        =   767
+      Top             =   4200
+      Width           =   1785
+      _ExtentX        =   3149
+      _ExtentY        =   794
       Caption         =   "Consume 1GB"
       Enabled         =   "True"
    End
    Begin MemEater2.Button cmdConsume 
       Height          =   555
-      Left            =   315
+      Left            =   11160
       TabIndex        =   1
-      Top             =   4170
+      Top             =   4095
       Width           =   2910
       _ExtentX        =   5133
       _ExtentY        =   979
@@ -87,8 +98,8 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
 
-Private Const BUTTON_HEIGHT As Integer = 28
-Private Const BUTTON_SPACING As Integer = 10
+Private Const BUTTON_HEIGHT As Integer = (15 * 28) '28 pixels
+Private Const BUTTON_SPACING As Integer = (15 * 10) '10 pixels
 
 Dim MinimumFormSize As POINTAPI
 
@@ -125,47 +136,53 @@ Private Sub MoveObjects()
   Status1.Move (Screen.TwipsPerPixelX * 3), (Screen.TwipsPerPixelY * 3)
   Status1.Width = (Me.ScaleWidth - (Status1.Left * 2))
   MemViewer1.Move Status1.Left, ((Status1.Top + Status1.Height) + (Screen.TwipsPerPixelY * 3)), Status1.Width
-  cmdConsume.Height = (Screen.TwipsPerPixelY * BUTTON_HEIGHT)
+  cmdConsume.Height = BUTTON_HEIGHT
   cmdGB.Height = cmdConsume.Height
   cmdReleaseGB.Height = cmdGB.Height
+  cmdCustomGB.Height = cmdReleaseGB.Height
   cmdReleaseAll.Height = cmdReleaseGB.Height
   cmdReleaseAll.Top = ((MemViewer1.Top + MemViewer1.Height) + (Screen.TwipsPerPixelY * 10))
   cmdReleaseAll.Left = Status1.Left
   With MinimumFormSize
-    If .Y = 0 Then .Y = ((cmdReleaseAll.Top + cmdReleaseAll.Height) + Status1.Top)
+    If .y = 0 Then .y = ((cmdReleaseAll.Top + cmdReleaseAll.Height) + Status1.Top)
     If .x = 0 Then .x = GetMinimumButtonWidth()
   End With
   cmdConsume.Top = cmdReleaseAll.Top
   cmdConsume.Left = (Me.ScaleWidth - (cmdConsume.Width + cmdReleaseAll.Left))
   cmdReleaseGB.Top = cmdConsume.Top
   cmdGB.Top = cmdReleaseGB.Top
+  cmdCustomGB.Top = cmdGB.Top
   Dim t As RECT
   With t
-    .Left = ((cmdReleaseAll.Left + cmdReleaseAll.Width) + (Screen.TwipsPerPixelX * BUTTON_SPACING))
-    .Right = (cmdConsume.Left - (Screen.TwipsPerPixelX * BUTTON_SPACING))
+    .Left = (cmdReleaseAll.Left + cmdReleaseAll.Width)
+    .Right = cmdConsume.Left
     
     Dim spacing As Long
-    spacing = (((.Right - .Left) - (cmdGB.Width + cmdReleaseGB.Width)) / 3)
-    cmdReleaseGB.Left = (.Left + spacing)
+    spacing = (((.Right - .Left) - (cmdGB.Width + cmdReleaseGB.Width + cmdCustomGB.Width)) / 4)
+    If spacing < BUTTON_SPACING Then spacing = BUTTON_SPACING
     cmdGB.Left = ((cmdReleaseGB.Left + cmdReleaseGB.Width) + spacing)
-    
-    'cmdGB.Left = (.Left + ((.Right - .Left) - cmdGB.Width) \ 2)
+    'cmdGB.Left = (cmdConsume.Left - (cmdGB.Width + spacing))
+    cmdCustomGB.Left = ((cmdGB.Left + cmdGB.Width) + spacing)
+    cmdReleaseGB.Left = (.Left + spacing)
   End With
 End Sub
 
 Private Function GetMinimumButtonWidth() As Long
   Dim r As Long, s As Long
-  s = (Screen.TwipsPerPixelX * BUTTON_SPACING)
+  s = BUTTON_SPACING
   r = (cmdConsume.Width + s)
   r = (r + (cmdGB.Width + s))
   r = (r + (cmdReleaseGB.Width + s))
+  r = (r + (cmdCustomGB.Width + s))
   GetMinimumButtonWidth = (r + cmdReleaseAll.Width)
 End Function
 
 Private Sub EnableButtons(DoEnable As Boolean)
   cmdConsume.Enabled = DoEnable
+  cmdCustomGB.Enabled = DoEnable
   cmdGB.Enabled = DoEnable
   cmdReleaseAll.Enabled = DoEnable
+  cmdReleaseGB.Enabled = DoEnable
 End Sub
 
 Private Sub CheckClientButtons()
@@ -174,26 +191,27 @@ Private Sub CheckClientButtons()
   cmdReleaseAll.Enabled = IIf(ActiveClients > 0, True, False)
 End Sub
 
-Private Sub cmdConsume_Click()
+Private Sub ConsumeNumberOfGB(NumGB As Long)
+  If NumGB < 1 Then Exit Sub
   Dim i As Long, c As Long, l As Collection
-  If ActiveClients >= MaxMemoryGB Then Exit Sub
   IsWorking = True
+  
   'Disable all buttons. We don't want the user to mess things up.
   EnableButtons False
+  
   Set l = New Collection
   Status1.Line3 = "Preparing child processes"
-  i = ActiveClients
-  Do Until i = MaxMemoryGB
+  For i = 1 To NumGB
     Status1.Line3 = Status1.Line3 & "."
     DoEvents
     
-    'Check if user wanted to close the window
+    'Check if user closed the window
     If ExitNow Then GoTo ExitConsume
-    c = LaunchNewClient
-    If c = 0 Then Exit Do
-    i = (i + 1)
+    
+    c = LaunchNewClient()
+    If c = 0 Then Exit For
     l.Add c
-  Loop
+  Next
   Do Until l.Count = 0
     ClientConsumeMemory l.Item(1), SIZE_GIGA
     l.Remove 1
@@ -202,9 +220,21 @@ ExitConsume:
   Set l = Nothing
   Status1.Line3 = ""
   
-  'Enable buttons again.
+  'enable buttons again
   EnableButtons True
+  
   IsWorking = False
+End Sub
+
+Private Sub cmdConsume_Click()
+  If ActiveClients >= MaxMemoryGB Then Exit Sub
+  ConsumeNumberOfGB (MaxMemoryGB - ActiveClients)
+End Sub
+
+Private Sub cmdCustomGB_Click()
+  Dim n As String
+  n = InputBox("How many GB do you wish to consume?", "Consume a number of GB...", CStr(MaxMemoryGB))
+  If IsNumeric(n) Then ConsumeNumberOfGB CLng(n)
 End Sub
 
 Private Sub cmdGB_Click()
@@ -248,7 +278,7 @@ Private Sub Form_Resize()
   MoveObjects
   With MinimumFormSize
     If Me.ScaleWidth < .x Then Me.Width = ((Me.Width - Me.ScaleWidth) + .x): Exit Sub
-    If Me.ScaleHeight <> .Y Then Me.Height = ((Me.Height - Me.ScaleHeight) + .Y): Exit Sub
+    If Me.ScaleHeight <> .y Then Me.Height = ((Me.Height - Me.ScaleHeight) + .y): Exit Sub
   End With
 End Sub
 
