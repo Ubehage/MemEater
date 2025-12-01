@@ -122,7 +122,7 @@ Private Sub CheckAppMessages()
         Case MEMMSG_EXIT
           ExitNow = True
           .ClientData.mData1 = MEMMSG_SUCCESS
-          updMem = True
+          'updMem = True
       End Select
     End With
     If updMem Then Call WriteToSharedMemory(False, True)
