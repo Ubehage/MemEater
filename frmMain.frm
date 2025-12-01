@@ -222,7 +222,7 @@ Private Sub ConsumeNumberOfGB(NumGB As Long)
   Status1.Line3 = ""
   
   'enable buttons again
-  EnableButtons True
+  If ExitNow = False Then EnableButtons True
   
   IsWorking = False
 End Sub
