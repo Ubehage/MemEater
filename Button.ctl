@@ -57,7 +57,7 @@ Public Property Let Enabled(New_Enabled As Boolean)
   If m_Enabled = New_Enabled Then Exit Property
   m_Enabled = New_Enabled
   If Not m_Enabled Then
-    EndHover
+    EndHover True
   Else
     Refresh
   End If
@@ -140,9 +140,13 @@ Private Function GetTextColor() As Long
   End If
 End Function
 
-Private Sub StartHover()
+Private Sub StartHover(Optional ForceRefresh As Boolean = False)
+  Dim r As Boolean
   If m_Hovering = False Then
     m_Hovering = True
+    r = True
+  End If
+  If (r = True Or ForceRefresh = True) Then
     Refresh
     SetScreenRect
   End If
@@ -151,11 +155,13 @@ Private Sub StartHover()
   m_IsCapturing = True
 End Sub
 
-Private Sub EndHover()
+Private Sub EndHover(Optional ForceRefresh As Boolean = False)
+  Dim r As Boolean
   If m_Hovering = True Then
     m_Hovering = False
-    Refresh
+    r = True
   End If
+  If (r = True Or ForceRefresh = True) Then Refresh
   If m_IsCapturing = False Or m_MouseIsDown = True Then Exit Sub
   EndCapture
 End Sub
