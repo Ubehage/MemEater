@@ -141,17 +141,21 @@ Private Function GetTextColor() As Long
 End Function
 
 Private Sub StartHover()
-  If m_Hovering = False Then m_Hovering = True
-  Refresh
-  SetScreenRect
+  If m_Hovering = False Then
+    m_Hovering = True
+    Refresh
+    SetScreenRect
+  End If
   If m_IsCapturing = True Then Exit Sub
   Call SetCapture(UserControl.hWnd)
   m_IsCapturing = True
 End Sub
 
 Private Sub EndHover()
-  If m_Hovering = True Then m_Hovering = False
-  Refresh
+  If m_Hovering = True Then
+    m_Hovering = False
+    Refresh
+  End If
   If m_IsCapturing = False Or m_MouseIsDown = True Then Exit Sub
   EndCapture
 End Sub
