@@ -77,7 +77,7 @@ End Sub
 
 Private Sub DrawTitle()
   UserControl.CurrentX = TextPos.x
-  UserControl.CurrentY = TextPos.Y
+  UserControl.CurrentY = TextPos.y
   UserControl.ForeColor = GetTextColor
   UserControl.Print m_Caption
 End Sub
@@ -94,18 +94,18 @@ End Sub
 
 Private Sub SetTextPosition()
   TextPos.x = (UserControl.ScaleWidth - UserControl.TextWidth(m_Caption)) \ 2
-  TextPos.Y = (UserControl.ScaleHeight - UserControl.TextHeight(m_Caption)) \ 2
+  TextPos.y = (UserControl.ScaleHeight - UserControl.TextHeight(m_Caption)) \ 2
 End Sub
 
 Private Sub SetScreenRect()
   Dim r As RECT, p As POINTAPI
   Call GetClientRect(UserControl.hWnd, r)
   p.x = r.Left
-  p.Y = r.Top
+  p.y = r.Top
   Call ClientToScreen(UserControl.hWnd, p)
   With m_ScreenRect
     .Left = p.x
-    .Top = p.Y
+    .Top = p.y
     .Right = (.Left + r.Right)
     .Bottom = (.Top + r.Bottom)
   End With
@@ -177,7 +177,7 @@ Private Function IsCursorOnButton() As Boolean
   Dim p As POINTAPI, hTop As Long
   Call GetCursorPos(p)
   If IsPointInRect(m_ScreenRect, p) = False Then If m_MouseIsDown = False Then Exit Function
-  hTop = WindowFromPoint(p.x, p.Y)
+  hTop = WindowFromPoint(p.x, p.y)
   If hTop <> UserControl.hWnd Then If m_MouseIsDown = False Then Exit Function
   IsCursorOnButton = True
 End Function
@@ -217,23 +217,23 @@ Private Sub UserControl_KeyUp(KeyCode As Integer, Shift As Integer)
   End If
 End Sub
 
-Private Sub UserControl_MouseDown(Button As Integer, Shift As Integer, x As Single, Y As Single)
+Private Sub UserControl_MouseDown(Button As Integer, Shift As Integer, x As Single, y As Single)
   If m_Enabled = False Then Exit Sub
   If Button = vbLeftButton Then
     m_MouseIsDown = True
     m_IsPressed = True
-    StartHover
+    StartHover True
   End If
 End Sub
 
-Private Sub UserControl_MouseMove(Button As Integer, Shift As Integer, x As Single, Y As Single)
+Private Sub UserControl_MouseMove(Button As Integer, Shift As Integer, x As Single, y As Single)
   If m_Enabled = False Then Exit Sub
   StartHover
   If m_IsCapturing = False Then Exit Sub
   If IsCursorOnButton() = False Then EndHover
 End Sub
 
-Private Sub UserControl_MouseUp(Button As Integer, Shift As Integer, x As Single, Y As Single)
+Private Sub UserControl_MouseUp(Button As Integer, Shift As Integer, x As Single, y As Single)
   If m_Enabled = False Then Exit Sub
   If Button = vbLeftButton Then
     m_MouseIsDown = False
