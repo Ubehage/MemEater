@@ -248,6 +248,7 @@ Private Sub EnableButtons(DoEnable As Boolean)
   cmdGB.Enabled = DoEnable
   cmdReleaseAll.Enabled = DoEnable
   cmdReleaseGB.Enabled = DoEnable
+  cmdCustomRelease.Enabled = DoEnable
 End Sub
 
 Private Sub CheckClientButtons()
