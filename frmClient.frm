@@ -34,6 +34,8 @@ Dim MemItem() As Mem_Data
 
 Dim MemStepIndex As Long
 
+Dim TimerCounter As Long
+
 Dim WithEvents ClientTimer As MemTimer
 Attribute ClientTimer.VB_VarHelpID = -1
 
@@ -149,7 +151,13 @@ Private Sub ClientTimer_Timer()
   ClientTimer.Enabled = False
   CheckMainProcess
   If ExitNow Then Unload Me Else CheckAppMessages
-  If MemItems > 0 Then GoThroughMemory
+  If MemItems > 0 Then
+    TimerCounter = (TimerCounter + 1)
+    If TimerCounter >= TIMER_COUNT_MEMSTEP Then
+      GoThroughMemory
+      TimerCounter = 0
+    End If
+  End If
   If Not ClientTimer Is Nothing Then ClientTimer.Enabled = True
 End Sub
 

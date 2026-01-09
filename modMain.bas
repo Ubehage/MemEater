@@ -8,10 +8,11 @@ Private Const CMD_CONSUME As String = "kijed"
 Private Const CMD_RESERVE As String = "edxcdtj"
 Private Const CMD_MEMOFFSET As String = "bhirn"
 
-Global Const APP_NAME As String = "Ubehage's MemEater v2"
+Global Const APP_NAME As String = "Ubehage's MemEater v2 (2.1)"
 
-Global Const TIMER_INTERVAL_DISPLAY = 300
-Global Const TIMER_INTERVAL_CLIENT = 500
+Global Const TIMER_INTERVAL_DISPLAY As Long = 300
+Global Const TIMER_INTERVAL_CLIENT As Long = 500
+Global Const TIMER_COUNT_MEMSTEP As Long = 6
 
 Global Const FONT_MAIN As String = "Segoe UI"
 Global Const FONT_SECONDARY As String = "Consolas"

@@ -213,7 +213,11 @@ Public Sub ReleaseAllClients()
 End Sub
 
 Public Sub CloseOneClient(FirstOrLast As FirstOrLast_data)
-  Dim i As Long, iFrom As Long, iTo As Long, iStep As Integer
+  CloseNumberOfClients 1, FirstOrLast
+End Sub
+
+Public Sub CloseNumberOfClients(NumberToClose As Long, FirstOrLast As FirstOrLast_data)
+  Dim i As Long, iFrom As Long, iTo As Long, iStep As Integer, c As Long
   Call ReadFromSharedMemory(True)
   With SharedMemory
     If FirstOrLast = flFirst Then
@@ -228,13 +232,14 @@ Public Sub CloseOneClient(FirstOrLast As FirstOrLast_data)
     If iStep = 0 Then Exit Sub  'Preventing an infinite loop.
                                 'Although this should logically never be necessary,
                                 'VB6 is sometimes weird.
-                                
+    
     For i = iFrom To iTo Step iStep
       If IsProcessAlive(.Instances(i).AppData.mData2) = True Then 'Check if this instance is a running process.
         If .Instances(i).ClientData.mData1 <> MEMMSG_EXIT Then    'Check if this instance has already been ordered to exit.
           .Instances(i).ClientData.mData1 = MEMMSG_EXIT
           Call WriteToSharedMemory(False, True, False, i)
-          Exit For
+          c = (c + 1)
+          If c >= NumberToClose Then Exit For
         End If
       End If
     Next

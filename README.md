@@ -45,6 +45,30 @@ Use with caution and save your work before starting any test.
     - **Release all consumed memory:** Frees all memory used by MemEater.
 3. Observe system behavior and memory stats in real time.
 
+## Recent Changes (1. Dec 2025)
+
+### New additions
+- Added a button and dialog that allow starting multiple consumer processes automatically.
+  Instead of clicking to spawn each consumer one-by-one, you can now enter a number and start that many consumers in one operation.
+  This is intended to make load/scale testing easier and faster.
+
+### Architectural changes
+- Fixed a rare race condition around shared memory by moving process self-registration to the end of the start-process sequence.
+  A consumer now completes its internal initialization and only registers itself in shared memory once its startup sequence is finished.
+- Every client now checks whether the main window is running; if the main window is closed, clients automatically release all consumed memory and clean up.
+  This moves responsibility for cleanup to the clients.
+- The main window no longer forcefully closes child processes when it is closed.
+- Rewrote the entire Start() function.
+  The Start() function has been refactored (race conditions removed).
+
+### Minor optimizations
+- Fixed a race condition that could occur when memory was overloaded and the user attempted to release a single consumer.
+  The release path has been hardened to avoid incorrect state when system memory is under stress.
+
+### Minor code improvements
+- Added comments describing the layout of shared memory and key offsets/fields.
+  These comments should help future maintainers understand the memory map and the registration/lookup logic.
+
 ## License
 
 This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
@@ -52,5 +76,4 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE) for detai
 ---
 
 > **Disclaimer:**  
-
 > MemEater is provided as-is, with no guarantee of fitness for any particular purpose. The author is not responsible for any data loss or system instability caused by its use. Use at your own risk.

@@ -8,7 +8,7 @@ Begin VB.UserControl Button
    ClientWidth     =   4800
    EditAtDesignTime=   -1  'True
    BeginProperty Font 
-      Name            =   "Consolas"
+      Name            =   "Segoe UI"
       Size            =   11.25
       Charset         =   0
       Weight          =   400
