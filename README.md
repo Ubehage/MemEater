@@ -1,4 +1,4 @@
-# MemEater v2  
+# MemEater v2 (2.1)  
 
 MemEater is a lightweight, portable utility for stress-testing Windows memory handling.  
 It is designed to intentionally overload system memory, allowing users and developers to observe how Windows behaves under low-memory conditions.
