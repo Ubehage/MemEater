@@ -47,10 +47,10 @@ Dim hTimerState As Boolean
 
 Friend Sub ConsumeMemory(BytesToConsume As Long)
   MemSize = BytesToConsume
+  IsConsuming = True
   Set ConsumeTimer = New MemTimer
   ConsumeTimer.Interval = 1
   ConsumeTimer.Enabled = True
-  IsConsuming = True
 End Sub
 
 Friend Sub ReleaseMemory()
@@ -78,8 +78,9 @@ End Sub
 
 Friend Sub ToggleHibernate(IsHibernating As Boolean)
   If IsConsuming Then
-    ConsumeTimer.Enabled = Not IsHibernating
-  ElseIf Not ClientTimer Is Nothing Then
+    If Not ConsumeTimer Is Nothing Then ConsumeTimer.Enabled = Not IsHibernating
+  End If
+  If Not ClientTimer Is Nothing Then
     If IsHibernating = True Then
       hTimerState = ClientTimer.Enabled
       If hTimerState = True Then ClientTimer.Enabled = False
@@ -87,6 +88,14 @@ Friend Sub ToggleHibernate(IsHibernating As Boolean)
       ClientTimer.Enabled = hTimerState
     End If
   End If
+End Sub
+
+Private Sub KillConsumeTimer()
+  If Not ConsumeTimer Is Nothing Then
+    ConsumeTimer.Enabled = False
+    Set ConsumeTimer = Nothing
+  End If
+  IsConsuming = False
 End Sub
 
 Private Sub GoThroughMemory()
@@ -153,12 +162,7 @@ Private Sub CheckMainProcess()
 End Sub
 
 Private Sub UnloadClient()
-  If IsConsuming Then
-    If Not ConsumeTimer Is Nothing Then
-      ConsumeTimer.Enabled = False
-      Set ConsumeTimer = Nothing
-    End If
-  End If
+  KillConsumeTimer
   ReleaseMemory
   Call UnhookClient(Me.hWnd)
   UnloadAll
@@ -171,7 +175,7 @@ Private Sub ClientTimer_Timer()
   If MemItems > 0 Then
     TimerCounter = (TimerCounter + 1)
     If TimerCounter >= TIMER_COUNT_MEMSTEP Then
-      GoThroughMemory
+      If IsConsuming = False Then GoThroughMemory
       TimerCounter = 0
     End If
   End If
@@ -191,10 +195,8 @@ Private Sub ConsumeTimer_Timer()
       ReDim .Data(1 To .Size) As Byte
     End With
   End If
-  CheckMainProcess
   If (MemSize = 0 Or ExitNow = True) Then
-    Set ConsumeTimer = Nothing
-    IsConsuming = False
+    KillConsumeTimer
     If ExitNow = True Then Unload Me
   Else
     ConsumeTimer.Enabled = True

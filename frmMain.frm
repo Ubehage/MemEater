@@ -133,7 +133,7 @@ Dim IsWorking As Boolean
 Friend Sub SetForm()
   WindowOnTop Me.hWnd, True
   Me.BackColor = COLOR_BACKGROUND
-  Me.Caption = APP_NAME
+  Me.Caption = GetAppName
   ResizeButtons
   Me.Show
   MoveObjects

@@ -8,7 +8,10 @@ Private Const CMD_CONSUME As String = "kijed"
 Private Const CMD_RESERVE As String = "edxcdtj"
 Private Const CMD_MEMOFFSET As String = "bhirn"
 
-Global Const APP_NAME As String = "Ubehage's MemEater v2 (2.1)"
+Private Const VERSION_MAJOR As String = "vma"
+Private Const VERSION_MINOR As String = "vmi"
+Private Const VERSION_REVISION As String = "vre"
+Global Const APP_NAME As String = "Ubehage's MemEater v2 (" & VERSION_MAJOR & "." & VERSION_MINOR & "." & VERSION_REVISION & ")"
 
 Global Const TIMER_INTERVAL_DISPLAY As Long = 300
 Global Const TIMER_INTERVAL_CLIENT As Long = 500
@@ -93,6 +96,12 @@ Private Function Start() As Integer
     Exit Function
   End If
   If RunNow Then Start = 2 Else Start = 1
+End Function
+
+Public Function GetAppName() As String
+  With App
+    GetAppName = Replace$(Replace$(Replace$(APP_NAME, VERSION_MAJOR, CStr(.Major)), VERSION_MINOR, CStr(.Minor)), VERSION_REVISION, CStr(.Revision))
+  End With
 End Function
 
 Private Function CheckPrevInstance() As Boolean
