@@ -39,6 +39,8 @@ Dim TimerCounter As Long
 Dim WithEvents ClientTimer As MemTimer
 Attribute ClientTimer.VB_VarHelpID = -1
 
+Dim hTimerState As Boolean
+
 Friend Sub ConsumeMemory(BytesToConsume As Long)
   Dim cB As Long
   cB = BytesToConsume
@@ -76,6 +78,17 @@ Friend Sub KillClientTimer()
   If Not ClientTimer Is Nothing Then
     ClientTimer.Enabled = False
     Set ClientTimer = Nothing
+  End If
+End Sub
+
+Friend Sub ToggleHibernate(IsHibernating As Boolean)
+  If Not ClientTimer Is Nothing Then
+    If IsHibernating = True Then
+      hTimerState = ClientTimer.Enabled
+      If hTimerState = True Then ClientTimer.Enabled = False
+    Else
+      ClientTimer.Enabled = hTimerState
+    End If
   End If
 End Sub
 
@@ -161,7 +174,12 @@ Private Sub ClientTimer_Timer()
   If Not ClientTimer Is Nothing Then ClientTimer.Enabled = True
 End Sub
 
+Private Sub Form_Load()
+  If IsRunningInIDE = False Then Call HookClientWindowProc(Me.hWnd)
+End Sub
+
 Private Sub Form_Unload(Cancel As Integer)
   KillClientTimer
+  Call UnhookClient(Me.hWnd)
   UnloadClient
 End Sub

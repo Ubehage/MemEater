@@ -14,6 +14,7 @@ UserControl=Status.ctl
 Form=frmClient.frm
 Module=modSharedMemory; modSharedMemory.bas
 UserControl=SeperatorLine.ctl
+Module=modClientSubclass; modClientSubclass.bas
 ResFile32="MemEater2.RES"
 IconForm="frmMain"
 Startup="Sub Main"

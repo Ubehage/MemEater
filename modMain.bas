@@ -38,12 +38,15 @@ Global Const SIZE_GIGA As Long = SIZE_MEGA * SIZE_KILO
 
 Global MaxMemoryGB As Long
 
+Global IsRunningInIDE As Boolean
+
 Global ExitNow As Boolean
 
 Dim RunNow As Boolean
 
 Sub Main()
   Dim s As Integer
+  IsRunningInIDE = IsInIDE()
   Call InitCommonControls
   s = Start
   If s = 0 Then Exit Sub
@@ -265,3 +268,17 @@ Private Sub SplitCommandLine(CommandLine As String)
     End Select
   Next
 End Sub
+
+Public Function IsInIDE() As Boolean
+  Dim inIDE As Boolean
+  inIDE = False
+  On Error Resume Next
+  Debug.Assert MakeIDECheck(inIDE)
+  On Error GoTo 0
+  IsInIDE = inIDE
+End Function
+
+Private Function MakeIDECheck(bSet As Boolean) As Boolean
+  bSet = True
+  MakeIDECheck = True
+End Function

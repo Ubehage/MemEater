@@ -71,9 +71,9 @@ Public Type RECT
   Bottom As Long
 End Type
 
-Private Declare Function SetWindowPos Lib "user32.dll" (ByVal hWnd As Long, ByVal hWndInsertAfter As Long, ByVal x As Long, ByVal y As Long, ByVal cX As Long, ByVal cy As Long, ByVal wFlags As Long) As Long
+Private Declare Function SetWindowPos Lib "user32.dll" (ByVal hwnd As Long, ByVal hWndInsertAfter As Long, ByVal x As Long, ByVal y As Long, ByVal cX As Long, ByVal cy As Long, ByVal wFlags As Long) As Long
 
-Private Declare Function SendMessage Lib "user32" Alias "SendMessageA" (ByVal hWnd As Long, ByVal wMsg As Long, ByVal wParam As Long, Param As Any) As Long
+Private Declare Function SendMessage Lib "user32" Alias "SendMessageA" (ByVal hwnd As Long, ByVal wMsg As Long, ByVal wParam As Long, Param As Any) As Long
 Private Declare Sub InitCommonControls9x Lib "comctl32" Alias "InitCommonControls" ()
 Private Declare Function InitCommonControlsEx Lib "comctl32" (lpInitCtrls As tagINITCOMMONCONTROLSEX) As Boolean
 
@@ -82,9 +82,9 @@ Public Declare Sub ZeroMemory Lib "kernel32.dll" Alias "RtlZeroMemory" (Destinat
 
 Public Declare Function GetCursorPos Lib "user32" (lpPoint As POINTAPI) As Long
 Public Declare Function WindowFromPoint Lib "user32" (ByVal x As Long, ByVal y As Long) As Long
-Public Declare Function ClientToScreen Lib "user32" (ByVal hWnd As Long, lpPoint As POINTAPI) As Long
-Public Declare Function GetClientRect Lib "user32" (ByVal hWnd As Long, lpRect As RECT) As Long
-Public Declare Function SetCapture Lib "user32" (ByVal hWnd As Long) As Long
+Public Declare Function ClientToScreen Lib "user32" (ByVal hwnd As Long, lpPoint As POINTAPI) As Long
+Public Declare Function GetClientRect Lib "user32" (ByVal hwnd As Long, lpRect As RECT) As Long
+Public Declare Function SetCapture Lib "user32" (ByVal hwnd As Long) As Long
 Public Declare Function ReleaseCapture Lib "user32" () As Long
 
 Public Declare Function GetLastError Lib "kernel32" () As Long
@@ -108,14 +108,14 @@ Public Function IsProcessAlive(ProcessId As Long) As Boolean
   IsProcessAlive = (r = WAIT_TIMEOUT)
 End Function
 
-Public Sub WindowOnTop(hWnd As Long, OnTop As Boolean)
+Public Sub WindowOnTop(hwnd As Long, OnTop As Boolean)
   Dim wFlags As Long
   If OnTop Then
     wFlags = HWND_TOPMOST
   Else
     wFlags = HWND_NOTOPMOST
   End If
-  SetWindowPos hWnd, wFlags, 0&, 0&, 0&, 0&, SWP_SETWINDOWPOS
+  SetWindowPos hwnd, wFlags, 0&, 0&, 0&, 0&, SWP_SETWINDOWPOS
 End Sub
 
 Public Function InitCommonControls(Optional ccFlags As COMMONCONTROLS_CLASSES = ccAll_Classes) As Boolean
