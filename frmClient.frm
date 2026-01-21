@@ -50,6 +50,7 @@ Friend Sub ConsumeMemory(BytesToConsume As Long)
   Set ConsumeTimer = New MemTimer
   ConsumeTimer.Interval = 1
   ConsumeTimer.Enabled = True
+  IsConsuming = True
 End Sub
 
 Friend Sub ReleaseMemory()
@@ -152,6 +153,12 @@ Private Sub CheckMainProcess()
 End Sub
 
 Private Sub UnloadClient()
+  If IsConsuming Then
+    If Not ConsumeTimer Is Nothing Then
+      ConsumeTimer.Enabled = False
+      Set ConsumeTimer = Nothing
+    End If
+  End If
   ReleaseMemory
   Call UnhookClient(Me.hWnd)
   UnloadAll
@@ -187,6 +194,7 @@ Private Sub ConsumeTimer_Timer()
   CheckMainProcess
   If (MemSize = 0 Or ExitNow = True) Then
     Set ConsumeTimer = Nothing
+    IsConsuming = False
     If ExitNow = True Then Unload Me
   Else
     ConsumeTimer.Enabled = True
