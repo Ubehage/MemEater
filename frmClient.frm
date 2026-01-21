@@ -31,31 +31,25 @@ End Type
 
 Dim MemItems As Long
 Dim MemItem() As Mem_Data
+Dim MemSize As Long
 
 Dim MemStepIndex As Long
 
 Dim TimerCounter As Long
 
+Dim WithEvents ConsumeTimer As MemTimer
+Attribute ConsumeTimer.VB_VarHelpID = -1
 Dim WithEvents ClientTimer As MemTimer
 Attribute ClientTimer.VB_VarHelpID = -1
 
+Dim IsConsuming As Boolean
 Dim hTimerState As Boolean
 
 Friend Sub ConsumeMemory(BytesToConsume As Long)
-  Dim cB As Long
-  cB = BytesToConsume
-  Do While cB > 0
-    If (MemItems Mod 10) = 0 Then
-      ReDim Preserve MemItem(1 To (MemItems + 10)) As Mem_Data
-    End If
-    MemItems = (MemItems + 1)
-    With MemItem(MemItems)
-      .Size = IIf(cB >= MEM_ITEM_SIZE, MEM_ITEM_SIZE, cB)
-      cB = (cB - .Size)
-      ReDim .Data(1 To .Size) As Byte
-    End With
-    If ExitNow Then Exit Do
-  Loop
+  MemSize = BytesToConsume
+  Set ConsumeTimer = New MemTimer
+  ConsumeTimer.Interval = 1
+  ConsumeTimer.Enabled = True
 End Sub
 
 Friend Sub ReleaseMemory()
@@ -82,7 +76,9 @@ Friend Sub KillClientTimer()
 End Sub
 
 Friend Sub ToggleHibernate(IsHibernating As Boolean)
-  If Not ClientTimer Is Nothing Then
+  If IsConsuming Then
+    ConsumeTimer.Enabled = Not IsHibernating
+  ElseIf Not ClientTimer Is Nothing Then
     If IsHibernating = True Then
       hTimerState = ClientTimer.Enabled
       If hTimerState = True Then ClientTimer.Enabled = False
@@ -157,6 +153,7 @@ End Sub
 
 Private Sub UnloadClient()
   ReleaseMemory
+  Call UnhookClient(Me.hWnd)
   UnloadAll
 End Sub
 
@@ -174,12 +171,33 @@ Private Sub ClientTimer_Timer()
   If Not ClientTimer Is Nothing Then ClientTimer.Enabled = True
 End Sub
 
+Private Sub ConsumeTimer_Timer()
+  ConsumeTimer.Enabled = False
+  If MemSize > 0 Then
+    If (MemItems Mod 10) = 0 Then
+      ReDim Preserve MemItem(1 To (MemItems + 10)) As Mem_Data
+    End If
+    MemItems = (MemItems + 1)
+    With MemItem(MemItems)
+      .Size = IIf(MemSize >= MEM_ITEM_SIZE, MEM_ITEM_SIZE, MemSize)
+      MemSize = (MemSize - .Size)
+      ReDim .Data(1 To .Size) As Byte
+    End With
+  End If
+  CheckMainProcess
+  If (MemSize = 0 Or ExitNow = True) Then
+    Set ConsumeTimer = Nothing
+    If ExitNow = True Then Unload Me
+  Else
+    ConsumeTimer.Enabled = True
+  End If
+End Sub
+
 Private Sub Form_Load()
   If IsRunningInIDE = False Then Call HookClientWindowProc(Me.hWnd)
 End Sub
 
 Private Sub Form_Unload(Cancel As Integer)
   KillClientTimer
-  Call UnhookClient(Me.hWnd)
   UnloadClient
 End Sub
